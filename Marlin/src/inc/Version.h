@@ -83,7 +83,7 @@
  * providing the source code to your customers.)
  */
 #ifndef SOURCE_CODE_URL
-  #define SOURCE_CODE_URL "https://github.com/bphillips09/SV04-IDEX-3D-Printer-Mainboard-Source-code"
+  #define SOURCE_CODE_URL "https://github.com/johncarlson21/SV04-IDEX-3D-Printer-Mainboard-Source-code"
 #endif
 
 /**

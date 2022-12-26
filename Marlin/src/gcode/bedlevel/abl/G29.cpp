@@ -674,9 +674,12 @@ G29_TYPE GcodeSuite::G29() {
             #if ENABLED(RTS_AVAILABLE)
               if((showcount ++) < GRID_MAX_POINTS_X * GRID_MAX_POINTS_Y)
               {
-                rtscheck.RTS_SndData(showcount, AUTO_BED_LEVEL_ICON_VP);
+                // added by John Carlson for new bed level point position display
+                if ((showcount + 1) <  GRID_MAX_POINTS_X * GRID_MAX_POINTS_Y)
+                {
+                  rtscheck.RTS_SndData(showcount, AUTO_BED_LEVEL_CUR_POINT_VP);
+                }
               }
-              rtscheck.RTS_SndData(z*1000, AUTO_BED_LEVEL_1POINT_VP + (showcount - 1) * 2);
             #endif
 
           #endif

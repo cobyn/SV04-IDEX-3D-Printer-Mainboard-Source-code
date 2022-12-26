@@ -87,6 +87,10 @@ extern int power_off_type_yes;
 // #define AUTO_BED_LEVEL_15POINT_VP          0x111C
 // #define AUTO_BED_LEVEL_16POINT_VP          0x111E
 
+// added by John for new bed point leveling display
+#define AUTO_BED_LEVEL_CUR_POINT_VP          0x0110
+#define AUTO_BED_LEVEL_END_POINT          0X0112
+
 #define AUTO_TRAM_1TEXT_VP                 0x1120
 //#define AUTO_TRAM_2TEXT_VP                 0x1138
 //#define AUTO_TRAM_3TEXT_VP                 0x1150

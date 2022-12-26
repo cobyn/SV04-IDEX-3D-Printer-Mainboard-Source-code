@@ -90,6 +90,9 @@ unsigned char AutoHomeIconNum;
 RTSSHOW rtscheck;
 int Update_Time_Value = 0;
 
+// added by John Carlson
+int AutoHomeFirstPoint = 1;
+
 bool PoweroffContinue = false;
 char commandbuf[30];
 bool active_extruder_flag = false;
@@ -1251,6 +1254,7 @@ void RTSSHOW::RTS_HandleData()
         active_extruder_font = active_extruder;
         Update_Time_Value = 0;
         queue.enqueue_now_P(PSTR("G28"));
+        queue.enqueue_now_P(PSTR("G1 F1000 Y150.0"));
         queue.enqueue_now_P(PSTR("G1 F200 Z0.0"));
         RTS_SndData(ExchangePageBase + 32, ExchangepageAddr);
 
@@ -1409,6 +1413,7 @@ void RTSSHOW::RTS_HandleData()
         {
           queue.enqueue_now_P(PSTR("G28 Z0"));
         }
+        queue.enqueue_now_P(PSTR("G1 F1000 Y150.0"));
         queue.enqueue_now_P(PSTR("G1 F200 Z0.0"));
       }
       else if (recdat.data[0] == 2)
@@ -1456,8 +1461,10 @@ void RTSSHOW::RTS_HandleData()
       {
         #if ENABLED(BLTOUCH)
           waitway = 3;
-          RTS_SndData(1, AUTO_BED_LEVEL_ICON_VP);
-          RTS_SndData(ExchangePageBase + 38, ExchangepageAddr);
+          // new bed level page added by John Carlson
+          RTS_SndData(AutoHomeFirstPoint, AUTO_BED_LEVEL_CUR_POINT_VP);
+          RTS_SndData(GRID_MAX_POINTS_X * GRID_MAX_POINTS_Y, AUTO_BED_LEVEL_END_POINT);
+          RTS_SndData(ExchangePageBase + 80, ExchangepageAddr);
           if (!all_axes_trusted()) {
             queue.enqueue_now_P(PSTR("G28"));
           }
