@@ -357,6 +357,10 @@ void RTSSHOW::RTS_Init()
     bool zig = false;
     int8_t inStart, inStop, inInc, showcount;
     showcount = 0;
+    // added by John Carlson
+    //std::ostringstream mstr;
+    //std::string mstr;
+
     //settings.load();
     for (int y = 0; y < GRID_MAX_POINTS_Y; y++)
     {
@@ -377,12 +381,20 @@ void RTSSHOW::RTS_Init()
       zig ^= true;
       for (int x = inStart; x != inStop; x += inInc)
       {
-        RTS_SndData(z_values[x][y] * 1000, AUTO_BED_LEVEL_1POINT_VP + showcount * 2);
+        //sprintf_P((unsigned char)mstr, PSTR("%hu %4.1f"), (unsigned char)mstr, z_values[x][y] * 1000);
+        //mstr << ' ' << z_values[x][y] * 1000;
+        //mstr =+ " " + std::to_string(z_values[x][y] * 1000);
+        //RTS_SndData(z_values[x][y] * 1000, AUTO_BED_LEVEL_1POINT_VP + showcount * 2);
         showcount++;
       }
+      //mstr =+  "\n";
+      //sprintf_P((unsigned char)mstr, PSTR("%hu %s"), (unsigned char)mstr, "\n");
     }
+
+    //RTS_SndData(mstr.c_str(), AUTO_BED_LEVEL_MESH_VP);
     queue.enqueue_now_P(PSTR("M420 S1"));
   #endif
+
   last_zoffset = zprobe_zoffset = probe.offset.z;
   RTS_SndData(probe.offset.z * 100, AUTO_BED_LEVEL_ZOFFSET_VP);
   RTS_SndData((hotend_offset[1].x - X2_MAX_POS) * 100, TWO_EXTRUDER_HOTEND_XOFFSET_VP);
@@ -405,6 +417,13 @@ void RTSSHOW::RTS_Init()
   RTS_SndData(thermalManager.temp_hotend[0].celsius, HEAD0_CURRENT_TEMP_VP);
   RTS_SndData(thermalManager.temp_hotend[1].celsius, HEAD1_CURRENT_TEMP_VP);
   RTS_SndData(thermalManager.temp_bed.celsius, BED_CURRENT_TEMP_VP);
+
+  // added by John Carlson
+  /***************transmit E-Steps to screen*******************/
+  RTS_SndData(planner.settings.axis_steps_per_mm[3], E0_SET_STEP_VP);
+  RTS_SndData(planner.settings.axis_steps_per_mm[4], E1_SET_STEP_VP);
+  RTS_SndData(planner.flow_percentage[0], E0_SET_FLOW_VP);
+  RTS_SndData(planner.flow_percentage[1], E1_SET_FLOW_VP);
 
   /***************transmit Fan speed to screen*****************/
   // turn off fans
@@ -1205,6 +1224,45 @@ void RTSSHOW::RTS_HandleData()
       Filament1LOAD = ((float)recdat.data[0]) / 10;
       break;
 
+    // added by John Carlson for updating e-steps
+    case E0StepsKey:
+      char cmd[MAX_CMD_SIZE+16];
+      sprintf_P(cmd, PSTR("M92 E%d T0"), recdat.data[0]);
+      SERIAL_ECHOLNPGM("E-steps 0: ", recdat.data[0]);
+      queue.enqueue_now_P(cmd);
+      queue.enqueue_now_P(PSTR("M500"));
+      RTS_SndData(StartSoundSet, SoundAddr);
+      RTS_SndData(recdat.data[0], E0_SET_STEP_VP);
+      break;
+
+    case E1StepsKey:
+        sprintf_P(cmd, PSTR("M92 E%d T1"), recdat.data[0]);
+        queue.enqueue_now_P(cmd);
+        queue.enqueue_now_P(PSTR("M500"));
+        RTS_SndData(StartSoundSet, SoundAddr);
+        RTS_SndData(recdat.data[0], E1_SET_STEP_VP);
+      break;
+    // end updating for e-steps
+    // added by John Carlson for updating flow
+    case E0FlowKey:
+      char cmd2[MAX_CMD_SIZE+16];
+      sprintf_P(cmd2, PSTR("M221 S%d T0"), recdat.data[0]);
+      SERIAL_ECHOLNPGM("E-steps 0: ", recdat.data[0]);
+      queue.enqueue_now_P(cmd2);
+      queue.enqueue_now_P(PSTR("M500"));
+      RTS_SndData(StartSoundSet, SoundAddr);
+      RTS_SndData(recdat.data[0], E0_SET_FLOW_VP);
+      break;
+
+    case E1FlowKey:
+        sprintf_P(cmd2, PSTR("M221 S%d T1"), recdat.data[0]);
+        queue.enqueue_now_P(cmd2);
+        queue.enqueue_now_P(PSTR("M500"));
+        RTS_SndData(StartSoundSet, SoundAddr);
+        RTS_SndData(recdat.data[0], E1_SET_FLOW_VP);
+      break;
+    // end updating for e-steps
+
     case AxisPageSelectKey:
       if(recdat.data[0] == 5)
       {
@@ -1242,6 +1300,7 @@ void RTSSHOW::RTS_HandleData()
       break;
 
     case SettingScreenKey:
+      SERIAL_ECHOLNPGM("Settings Button ID: ", recdat.data[0]);
       if(recdat.data[0] == 1)
       {
         // Motor Icon
@@ -1351,6 +1410,26 @@ void RTSSHOW::RTS_HandleData()
       else if (recdat.data[0] == 7)
       {
         RTS_SndData(ExchangePageBase + 1, ExchangepageAddr);
+      }
+      else if (recdat.data[0] == 8) // switch to advanced settings page 
+      {
+        RTS_SndData(ExchangePageBase + 83, ExchangepageAddr);
+      }
+      break;
+
+    case ASettingsScreenKey:
+      SERIAL_ECHOLNPGM("ASettings Button ID: ", recdat.data[0]);
+      if (recdat.data[0] == 1) // switch to e-steps page 
+      {
+        RTS_SndData(ExchangePageBase + 82, ExchangepageAddr);
+      }
+      else if (recdat.data[0] == 2) // switch to flow settings page 
+      {
+        RTS_SndData(ExchangePageBase + 84, ExchangepageAddr);
+      }
+      else if (recdat.data[0] == 9) // switch back to settings page
+      {
+        RTS_SndData(ExchangePageBase + 21, ExchangepageAddr);
       }
       break;
 
@@ -1730,6 +1809,7 @@ void RTSSHOW::RTS_HandleData()
       break;
 
     case FilamentLoadKey:
+
       if(recdat.data[0] == 1)
       {
         if(!planner.has_blocks_queued())
