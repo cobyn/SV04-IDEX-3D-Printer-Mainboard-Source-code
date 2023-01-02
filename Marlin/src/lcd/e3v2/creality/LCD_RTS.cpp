@@ -965,7 +965,6 @@ void RTSSHOW::RTS_HandleData()
       break;
 
     case ResumePrintKey:
-      queue.enqueue_now_P(PSTR("M117 Resuming..."));
       #if BOTH(M600_PURGE_MORE_RESUMABLE, ADVANCED_PAUSE_FEATURE)
         pause_menu_response = PAUSE_RESPONSE_RESUME_PRINT;  // Simulate menu selection
       #endif
@@ -987,13 +986,11 @@ void RTSSHOW::RTS_HandleData()
       {
         //change filament and resume
         RTS_SndData(ExchangePageBase + 40, ExchangepageAddr);
-        //card.startOrResumeFilePrinting();
         Update_Time_Value = 0;
         pause_action_flag = false;
         sdcard_pause_check = true;
         PrintFlag = 2;
         RTS_SndData(ExchangePageBase + 11, ExchangepageAddr);
-        queue.enqueue_now_P(PSTR("M75"));
         TERN_(HOST_PAUSE_M76, host_action_resume());
       }
       else if(recdat.data[0] == 3)

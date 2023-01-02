@@ -542,6 +542,7 @@ void wait_for_confirmation(const bool is_reload/*=false*/, const int8_t max_beep
   KEEPALIVE_STATE(PAUSED_FOR_USER);
   TERN_(HOST_PROMPT_SUPPORT, host_prompt_do(PROMPT_USER_CONTINUE, GET_TEXT(MSG_NOZZLE_PARKED), CONTINUE_STR));
   TERN_(EXTENSIBLE_UI, ExtUI::onUserConfirmRequired_P(GET_TEXT(MSG_NOZZLE_PARKED)));
+  SERIAL_ECHOLNPGM("Confirmation page 8 triggered");
   rtscheck.RTS_SndData(ExchangePageBase + 8, ExchangepageAddr);
   wait_for_user = true;    // LCD click or M108 will clear this
   while (wait_for_user) {
@@ -601,6 +602,7 @@ void wait_for_confirmation(const bool is_reload/*=false*/, const int8_t max_beep
     }
     idle_no_sleep();
   }
+  SERIAL_ECHOLNPGM("End Wait for user.");
   #if ENABLED(DUAL_X_CARRIAGE)
     set_duplication_enabled(saved_ext_dup_mode, saved_ext);
   #endif
@@ -642,6 +644,7 @@ void resume_print(const_float_t slow_load_length/*=0*/, const_float_t fast_load_
   // Re-enable the heaters if they timed out
   bool nozzle_timed_out = false;
   HOTEND_LOOP() {
+
     nozzle_timed_out |= thermalManager.heater_idle[e].timed_out;
     thermalManager.reset_hotend_idle_timer(e);
   }
@@ -651,9 +654,9 @@ void resume_print(const_float_t slow_load_length/*=0*/, const_float_t fast_load_
 
   // Load the new filament
   load_filament(slow_load_length, fast_load_length, purge_length, max_beep_count, true, nozzle_timed_out, PAUSE_MODE_SAME DXC_PASS);
-
-  queue.enqueue_now_P(PSTR("M117 Loading filament..."));
-
+  
+  //queue.enqueue_now_P(PSTR("M117 Loading filament..."));
+  
   if (targetTemp > 0) {
     thermalManager.setTargetHotend(targetTemp, active_extruder);
     thermalManager.wait_for_hotend(active_extruder, false);
@@ -666,7 +669,7 @@ void resume_print(const_float_t slow_load_length/*=0*/, const_float_t fast_load_
 
   // Retract to prevent oozing
   unscaled_e_move(-(PAUSE_PARK_RETRACT_LENGTH), feedRate_t(PAUSE_PARK_RETRACT_FEEDRATE));
-
+  SERIAL_ECHOLNPGM("check for home");
   if (!axes_should_home()) {
     // Move XY back to saved position
     destination.set(resume_position.x, resume_position.y, current_position.z, current_position.e);
