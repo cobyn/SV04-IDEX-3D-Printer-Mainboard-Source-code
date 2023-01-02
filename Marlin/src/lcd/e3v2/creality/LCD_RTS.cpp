@@ -842,6 +842,8 @@ void RTSSHOW::RTS_HandleData()
         RTS_SndData(0, PRINT_TIME_MIN_VP);
         RTS_SndData(0, PRINT_SURPLUS_TIME_HOUR_VP);
         RTS_SndData(0, PRINT_SURPLUS_TIME_MIN_VP);
+        RTS_SndData(0, E0_SET_FAN_VP);
+        RTS_SndData(0, E1_SET_FAN_VP);
 
         sd_printing_autopause = false;
         change_page_number = 1;
@@ -890,11 +892,13 @@ void RTSSHOW::RTS_HandleData()
         if (thermalManager.fan_speed[0])
         {
           RTS_SndData(1, HEAD0_FAN_ICON_VP);
+          RTS_SndData(0, E0_SET_FAN_VP);
           thermalManager.set_fan_speed(0, 0);
         }
         else
         {
           RTS_SndData(0, HEAD0_FAN_ICON_VP);
+          RTS_SndData(255, E0_SET_FAN_VP);
           thermalManager.set_fan_speed(0, 255);
         }
       }
@@ -903,11 +907,13 @@ void RTSSHOW::RTS_HandleData()
         if (thermalManager.fan_speed[1])
         {
           RTS_SndData(1, HEAD1_FAN_ICON_VP);
+          RTS_SndData(0, E1_SET_FAN_VP);
           thermalManager.set_fan_speed(1, 0);
         }
         else
         {
           RTS_SndData(0, HEAD1_FAN_ICON_VP);
+          RTS_SndData(255, E1_SET_FAN_VP);
           thermalManager.set_fan_speed(1, 255);
         }
       }
@@ -926,6 +932,8 @@ void RTSSHOW::RTS_HandleData()
         RTS_SndData(0, PRINT_TIME_MIN_VP);
         RTS_SndData(0, PRINT_SURPLUS_TIME_HOUR_VP);
         RTS_SndData(0, PRINT_SURPLUS_TIME_MIN_VP);
+        RTS_SndData(0, E0_SET_FAN_VP);
+        RTS_SndData(0, E1_SET_FAN_VP);
         RTS_SDcard_Stop();
         Update_Time_Value = 0;
         PrintFlag = 0;
@@ -1270,18 +1278,30 @@ void RTSSHOW::RTS_HandleData()
       //char cmd3[MAX_CMD_SIZE+16];
       sprintf_P(cmd3, PSTR("M106 S%d P0"), recdat.data[0]);
       SERIAL_ECHOLNPGM("Fan 0: ", recdat.data[0]);
-      queue.enqueue_now_P(cmd3);
-      queue.enqueue_now_P(PSTR("M500"));
+      //queue.enqueue_now_P(cmd3);
+      //queue.enqueue_now_P(PSTR("M500"));
+      thermalManager.set_fan_speed(0, recdat.data[0]);
       RTS_SndData(StartSoundSet, SoundAddr);
       RTS_SndData(recdat.data[0], E0_SET_FAN_VP);
+      if (recdat.data[0] > 0) {
+        RTS_SndData(0, HEAD0_FAN_ICON_VP);
+      } else {
+        RTS_SndData(1, HEAD0_FAN_ICON_VP);
+      }
       break;
 
     case E1FanKey:
         sprintf_P(cmd3, PSTR("M106 S%d P1"), recdat.data[0]);
-        queue.enqueue_now_P(cmd3);
-        queue.enqueue_now_P(PSTR("M500"));
+        //queue.enqueue_now_P(cmd3);
+        //queue.enqueue_now_P(PSTR("M500"));
+        thermalManager.set_fan_speed(1, recdat.data[0]);
         RTS_SndData(StartSoundSet, SoundAddr);
         RTS_SndData(recdat.data[0], E1_SET_FAN_VP);
+        if (recdat.data[0] > 0) {
+        RTS_SndData(0, HEAD1_FAN_ICON_VP);
+      } else {
+        RTS_SndData(1, HEAD1_FAN_ICON_VP);
+      }
       break;
     // end updating for fan speed
 
@@ -2449,18 +2469,22 @@ void RTSSHOW::RTS_HandleData()
       if (thermalManager.fan_speed[0] == 0)
       {
         RTS_SndData(1, HEAD0_FAN_ICON_VP);
+        RTS_SndData(thermalManager.fan_speed[0], E0_SET_FAN_VP);
       }
       else
       {
         RTS_SndData(0, HEAD0_FAN_ICON_VP);
+        RTS_SndData(thermalManager.fan_speed[0], E0_SET_FAN_VP);
       }
       if (thermalManager.fan_speed[1] == 0)
       {
         RTS_SndData(1, HEAD1_FAN_ICON_VP);
+        RTS_SndData(thermalManager.fan_speed[1], E1_SET_FAN_VP);
       }
       else
       {
         RTS_SndData(0, HEAD1_FAN_ICON_VP);
+        RTS_SndData(thermalManager.fan_speed[1], E1_SET_FAN_VP);
       }
       Percentrecord = card.percentDone() + 1;
       if (Percentrecord <= 100)
