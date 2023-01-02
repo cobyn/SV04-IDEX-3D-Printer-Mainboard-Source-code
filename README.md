@@ -1,3 +1,26 @@
+# SOVOL 3D SV04 Updated Firmware
+
+This firmware fixes a few issues and adds some new functionality. This firmware is forked on Brandon Phillips Repo and changes.
+
+# Added Features
+
+- Probing Grid Sizes, current is 7x7
+- Added Advanced Settings Screen ( more will be added here )
+- E-step adjustment
+- Flow adjustment
+- Fan adjustment
+- Fix Filament Runout/Change Filament issue ( didn't work and froze )
+- Z Offset from 0.05 to 0.01
+- SD Card changes to allow for folders and more
+- Screen Adjustments ( Need new screen firmware )
+- Screen Firmware [Click here](https://github.com/johncarlson21/SV04-Touchscreen)
+- other little cleanups
+
+
+
+
+# ORIGINAL SOVOL README AND CODE INFO
+
 # Introduction
 
 Sovol SV04 IDEX 3D Printer comes with dual independent direct drive extruders, both are metal titan style extruders,  
