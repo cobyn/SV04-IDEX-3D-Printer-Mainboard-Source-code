@@ -424,6 +424,8 @@ void RTSSHOW::RTS_Init()
   RTS_SndData(planner.settings.axis_steps_per_mm[4], E1_SET_STEP_VP);
   RTS_SndData(planner.flow_percentage[0], E0_SET_FLOW_VP);
   RTS_SndData(planner.flow_percentage[1], E1_SET_FLOW_VP);
+  RTS_SndData(thermalManager.fan_speed[0], E0_SET_FAN_VP);
+  RTS_SndData(thermalManager.fan_speed[1], E1_SET_FAN_VP);
 
   /***************transmit Fan speed to screen*****************/
   // turn off fans
@@ -802,6 +804,10 @@ void RTSSHOW::RTS_HandleData()
     recdat.head[1] = FHTWO;
     return;
   }
+
+  char cmd[MAX_CMD_SIZE+16];
+  char cmd2[MAX_CMD_SIZE+16];
+  char cmd3[MAX_CMD_SIZE+16];
 
   switch(Checkkey)
   {
@@ -1223,7 +1229,7 @@ void RTSSHOW::RTS_HandleData()
 
     // added by John Carlson for updating e-steps
     case E0StepsKey:
-      char cmd[MAX_CMD_SIZE+16];
+      //char cmd[MAX_CMD_SIZE+16];
       sprintf_P(cmd, PSTR("M92 E%d T0"), recdat.data[0]);
       SERIAL_ECHOLNPGM("E-steps 0: ", recdat.data[0]);
       queue.enqueue_now_P(cmd);
@@ -1242,7 +1248,7 @@ void RTSSHOW::RTS_HandleData()
     // end updating for e-steps
     // added by John Carlson for updating flow
     case E0FlowKey:
-      char cmd2[MAX_CMD_SIZE+16];
+      //char cmd2[MAX_CMD_SIZE+16];
       sprintf_P(cmd2, PSTR("M221 S%d T0"), recdat.data[0]);
       SERIAL_ECHOLNPGM("E-steps 0: ", recdat.data[0]);
       queue.enqueue_now_P(cmd2);
@@ -1258,7 +1264,26 @@ void RTSSHOW::RTS_HandleData()
         RTS_SndData(StartSoundSet, SoundAddr);
         RTS_SndData(recdat.data[0], E1_SET_FLOW_VP);
       break;
-    // end updating for e-steps
+    // end updating for flow
+    // added by John Carlson for updating fan speed
+    case E0FanKey:
+      //char cmd3[MAX_CMD_SIZE+16];
+      sprintf_P(cmd3, PSTR("M106 S%d P0"), recdat.data[0]);
+      SERIAL_ECHOLNPGM("Fan 0: ", recdat.data[0]);
+      queue.enqueue_now_P(cmd3);
+      queue.enqueue_now_P(PSTR("M500"));
+      RTS_SndData(StartSoundSet, SoundAddr);
+      RTS_SndData(recdat.data[0], E0_SET_FAN_VP);
+      break;
+
+    case E1FanKey:
+        sprintf_P(cmd3, PSTR("M106 S%d P1"), recdat.data[0]);
+        queue.enqueue_now_P(cmd3);
+        queue.enqueue_now_P(PSTR("M500"));
+        RTS_SndData(StartSoundSet, SoundAddr);
+        RTS_SndData(recdat.data[0], E1_SET_FAN_VP);
+      break;
+    // end updating for fan speed
 
     case AxisPageSelectKey:
       if(recdat.data[0] == 5)
