@@ -106,7 +106,7 @@ extern int power_off_type_yes;
 #define EXCHANGE_NOZZLE_ICON_VP            0x21BC
 #define PRINT_MODE_ICON_VP                 0x21BD
 #define PRINT_FILE_TEXT_VP                 0x21C0
-#define Screen_Version_VP                  0X2200
+#define Screen_Version_VP                  0x2200
 #define FilenameNature                     0x6003
 #define	Beep       					               ((unsigned long)0x02AF0100)
 /************struct**************/

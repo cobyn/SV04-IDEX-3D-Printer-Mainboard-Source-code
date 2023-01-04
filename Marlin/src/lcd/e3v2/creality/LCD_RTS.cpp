@@ -1239,7 +1239,6 @@ void RTSSHOW::RTS_HandleData()
     case E0StepsKey:
       //char cmd[MAX_CMD_SIZE+16];
       sprintf_P(cmd, PSTR("M92 E%d T0"), recdat.data[0]);
-      SERIAL_ECHOLNPGM("E-steps 0: ", recdat.data[0]);
       queue.enqueue_now_P(cmd);
       queue.enqueue_now_P(PSTR("M500"));
       RTS_SndData(StartSoundSet, SoundAddr);
@@ -1258,7 +1257,6 @@ void RTSSHOW::RTS_HandleData()
     case E0FlowKey:
       //char cmd2[MAX_CMD_SIZE+16];
       sprintf_P(cmd2, PSTR("M221 S%d T0"), recdat.data[0]);
-      SERIAL_ECHOLNPGM("E-steps 0: ", recdat.data[0]);
       queue.enqueue_now_P(cmd2);
       queue.enqueue_now_P(PSTR("M500"));
       RTS_SndData(StartSoundSet, SoundAddr);
@@ -1277,9 +1275,6 @@ void RTSSHOW::RTS_HandleData()
     case E0FanKey:
       //char cmd3[MAX_CMD_SIZE+16];
       sprintf_P(cmd3, PSTR("M106 S%d P0"), recdat.data[0]);
-      SERIAL_ECHOLNPGM("Fan 0: ", recdat.data[0]);
-      //queue.enqueue_now_P(cmd3);
-      //queue.enqueue_now_P(PSTR("M500"));
       thermalManager.set_fan_speed(0, recdat.data[0]);
       RTS_SndData(StartSoundSet, SoundAddr);
       RTS_SndData(recdat.data[0], E0_SET_FAN_VP);
@@ -1292,8 +1287,6 @@ void RTSSHOW::RTS_HandleData()
 
     case E1FanKey:
         sprintf_P(cmd3, PSTR("M106 S%d P1"), recdat.data[0]);
-        //queue.enqueue_now_P(cmd3);
-        //queue.enqueue_now_P(PSTR("M500"));
         thermalManager.set_fan_speed(1, recdat.data[0]);
         RTS_SndData(StartSoundSet, SoundAddr);
         RTS_SndData(recdat.data[0], E1_SET_FAN_VP);
@@ -1468,6 +1461,10 @@ void RTSSHOW::RTS_HandleData()
       else if (recdat.data[0] == 2) // switch to flow settings page 
       {
         RTS_SndData(ExchangePageBase + 84, ExchangepageAddr);
+      }
+      else if (recdat.data[0] == 3) // switch to pid tuning page)
+      {
+        RTS_SndData(ExchangePageBase + 85, ExchangepageAddr);
       }
       else if (recdat.data[0] == 9) // switch back to settings page
       {
@@ -2671,6 +2668,7 @@ void EachMomentUpdate()
 }
 
 void SetExtruderMode(unsigned int mode, bool isDirect) {
+  SERIAL_ECHOLNPGM("Selected extruder mode: ", mode);
   if (isDirect && mode == 4) {
     mode = 5;
   } else if (isDirect && mode == 0) {
