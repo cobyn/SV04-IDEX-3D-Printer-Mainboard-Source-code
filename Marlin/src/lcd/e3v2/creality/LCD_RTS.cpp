@@ -1472,6 +1472,31 @@ void RTSSHOW::RTS_HandleData()
       }
       break;
 
+    case PIDScreenKey:
+      SERIAL_ECHOLNPGM("PIDScreenkey Button ID: ", recdat.data[0]);
+      RTS_SndData(ExchangePageBase + 86, ExchangepageAddr);
+      RTS_SndData("                   ", PID_TEXT_OUT_VP);
+      if (recdat.data[0] == 1) // nozzle 1 page 
+      {
+        const heater_id_t hid = (heater_id_t)0;
+        thermalManager.PID_autotune(200, hid, 5, 1);
+      }
+      else if (recdat.data[0] == 2) // nozzle 2 page 
+      {
+        const heater_id_t hid = (heater_id_t)1;
+        thermalManager.PID_autotune(200, hid, 5, 1);
+      }
+      else if (recdat.data[0] == 3) // bed page 
+      {
+        const heater_id_t hid = (heater_id_t)-1;
+        thermalManager.PID_autotune(60, hid, 5, 1);
+      }
+      else if (recdat.data[0] == 9)
+      {
+        RTS_SndData(ExchangePageBase + 85, ExchangepageAddr);
+      }
+    break;
+
     case SettingBackKey:
       if (recdat.data[0] == 1)
       {

@@ -562,7 +562,25 @@ volatile bool Temperature::raw_temps_ready = false;
     int cycles = 0;
     bool heating = true;
 
-    millis_t next_temp_ms = millis(), t1 = next_temp_ms, t2 = next_temp_ms;
+    // added by John Carlson for showing PID Auto Tun on screen
+    char textRep[20];
+    int repT = 1; // added for updating the running icon
+    rtscheck.RTS_SndData(0, PID_TUNING_RUNNING_VP);
+    if (heater_id == 0)
+    {
+      rtscheck.RTS_SndData(1, PID_ICON_MODE_VP);
+    }
+    else if (heater_id == 1)
+    {
+      rtscheck.RTS_SndData(2, PID_ICON_MODE_VP);
+    }
+    else if (heater_id == -1)
+    {
+      rtscheck.RTS_SndData(3, PID_ICON_MODE_VP);
+    }
+    
+
+    millis_t next_temp_ms = millis(), t1 = next_temp_ms, t2 = next_temp_ms, next_rep_ms = next_temp_ms;
     long t_high = 0, t_low = 0;
 
     PID_t tune_pid = { 0, 0, 0 };
@@ -696,6 +714,9 @@ volatile bool Temperature::raw_temps_ready = false;
                 SERIAL_ECHOLNPGM(STR_CLASSIC_PID);
               SERIAL_ECHOLNPGM(STR_KP, tune_pid.Kp, STR_KI, tune_pid.Ki, STR_KD, tune_pid.Kd);
             }
+            // added by John Carlson to show output of cycle
+            sprintf_P(textRep, PSTR("Cycle: %d"), cycles);
+            rtscheck.RTS_SndData(textRep, PID_TEXT_OUT_VP);
           }
           SHV((bias + d) >> 1);
           TERN_(HAS_STATUS_MESSAGE, ui.status_printf_P(0, PSTR(S_FMT " %i/%i"), GET_TEXT(MSG_PID_CYCLE), cycles, ncycles));
@@ -713,6 +734,15 @@ volatile bool Temperature::raw_temps_ready = false;
         TERN_(EXTENSIBLE_UI, ExtUI::onPidTuning(ExtUI::result_t::PID_TEMP_TOO_HIGH));
         TERN_(DWIN_CREALITY_LCD_ENHANCED, DWIN_PidTuning(PID_TEMP_TOO_HIGH));
         break;
+      }
+
+      // added by John Carlson to update runnin icon
+      if (ELAPSED(ms, next_rep_ms)) {
+        rtscheck.RTS_SndData(repT ++, PID_TUNING_RUNNING_VP);
+        if (repT > 11) {
+          repT = 0;
+        }
+        next_rep_ms = ms + 500UL;
       }
 
       // Report heater states every 2 seconds
@@ -822,6 +852,11 @@ volatile bool Temperature::raw_temps_ready = false;
 
         TERN_(EXTENSIBLE_UI, ExtUI::onPidTuning(ExtUI::result_t::PID_DONE));
         TERN_(DWIN_CREALITY_LCD_ENHANCED, DWIN_PidTuning(PID_DONE));
+
+        // added by John Carlson to change page after PID Tuning complete
+        rtscheck.RTS_SndData("PID Tuning Complete!", PID_TEXT_OUT_VP);
+        delay(2000);
+        rtscheck.RTS_SndData(ExchangePageBase + 87, ExchangepageAddr);
 
         goto EXIT_M303;
       }

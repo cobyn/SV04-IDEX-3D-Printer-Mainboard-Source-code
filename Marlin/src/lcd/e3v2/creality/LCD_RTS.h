@@ -76,6 +76,9 @@ extern int power_off_type_yes;
 #define AUTO_BED_LEVEL_CUR_POINT_VP          0x0110
 #define AUTO_BED_LEVEL_END_POINT          0x0112
 #define AUTO_BED_LEVEL_MESH_VP            0x0111
+#define PID_TUNING_RUNNING_VP             0x1001
+#define PID_ICON_MODE_VP                  0x1003
+#define PID_TEXT_OUT_VP                   0x205B
 
 // add by John Carlson for new e-steps update
 #define E0_SET_STEP_VP                        0x1103
@@ -219,6 +222,7 @@ enum PROC_COM
   SelectFileKey,
   SaveEEPROM,
   ASettingsScreenKey,
+  PIDScreenKey,
   ChangePageKey
 };
 
@@ -265,6 +269,7 @@ const unsigned long Addrbuf[] =
   0x2199,
   0x2202,
   0x103F,
+  0x1080,
   0x110E,
   0
 };
